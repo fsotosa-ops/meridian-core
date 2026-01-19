@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "meridian-core"
+version = "1.0.0"
+description = "Infraestructura de prospección modular con RAG y multi-agentes"
+authors = ["Meridian Team"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.109.0"
+uvicorn = "^0.27.0"
+playwright = "^1.49.0"
+playwright-stealth = "^1.0.6"
+google-genai = "^0.1.0"
+pydantic = "^2.7.0"
+pydantic-settings = "^2.1.0"
+supabase = "^2.3.0"
+vecs = "^0.4.0" # Cliente de vectores para Supabase
+requests = "^2.31.0"
