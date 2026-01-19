@@ -3,9 +3,12 @@ name = "meridian-core"
 version = "1.0.0"
 description = "Infraestructura de prospección modular con RAG y multi-agentes"
 authors = ["Meridian Team"]
+license = "MIT"
+readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 fastapi = "^0.109.0"
 uvicorn = "^0.27.0"
 playwright = "^1.49.0"
@@ -14,5 +17,9 @@ google-genai = "^0.1.0"
 pydantic = "^2.7.0"
 pydantic-settings = "^2.1.0"
 supabase = "^2.3.0"
-vecs = "^0.4.0" # Cliente de vectores para Supabase
+vecs = "^0.4.0"
 requests = "^2.31.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
