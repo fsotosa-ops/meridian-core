@@ -4,8 +4,7 @@ version = "1.0.0"
 description = "Infraestructura de prospección modular con RAG y multi-agentes"
 authors = ["Meridian Team"]
 license = "MIT"
-readme = "README.md"
-package-mode = false
+package-mode = false 
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -19,7 +18,5 @@ pydantic-settings = "^2.1.0"
 supabase = "^2.3.0"
 vecs = "^0.4.0"
 requests = "^2.31.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+setuptools = "^80.9.0"
+email-validator = "^2.3.0"

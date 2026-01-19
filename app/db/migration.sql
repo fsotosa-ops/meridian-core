@@ -1,12 +1,14 @@
--- 1. Habilitar la extensión de vectores
+-- 1. Habilitar extensiones necesarias
 CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- Asegura la disponibilidad de gen_random_uuid()
 
 -- 2. Crear el esquema específico para el agente
 CREATE SCHEMA IF NOT EXISTS "meridian-agent";
 
--- 3. Tabla de Usuarios (BDRs)
+-- 3. Tabla de Usuarios (BDRs) con ID autogenerado
 CREATE TABLE "meridian-agent".users (
-    id UUID PRIMARY KEY DEFAULT auth.uid(),
+    -- Cambio clave: Se usa gen_random_uuid() para no depender de la sesión de Auth de Supabase
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email TEXT UNIQUE NOT NULL,
     hashed_api_key TEXT NOT NULL, -- SHA-256 de la sk_live_...
     plan_type TEXT DEFAULT 'free',
@@ -20,7 +22,7 @@ CREATE TABLE "meridian-agent".leads_memory (
     content TEXT, -- Texto crudo del perfil
     metadata JSONB, -- {name, company, role, reason}
     embedding VECTOR(768), -- Tamaño para modelos de Google Gemini
-    status TEXT DEFAULT 'validated', -- Para que el RAG solo use lo aprobado por el BDR
+    status TEXT DEFAULT 'validated',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -56,3 +58,15 @@ BEGIN
   LIMIT match_count;
 END;
 $$;
+
+-- 7. PERMISOS DE SEGURIDAD (Esenciales para evitar el error 42501)
+-- Otorgar uso del esquema a los roles de la API
+GRANT USAGE ON SCHEMA "meridian-agent" TO anon, authenticated, service_role;
+
+-- Otorgar todos los permisos sobre las tablas existentes al rol de servicio
+GRANT ALL ON ALL TABLES IN SCHEMA "meridian-agent" TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA "meridian-agent" TO service_role;
+
+-- Asegurar que las tablas futuras también tengan permisos automáticos
+ALTER DEFAULT PRIVILEGES IN SCHEMA "meridian-agent" 
+GRANT ALL ON TABLES TO service_role;

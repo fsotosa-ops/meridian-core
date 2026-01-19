@@ -1,28 +1,42 @@
-from playwright.sync_api import sync_playwright
-from playwright_stealth import Stealth
+# app/agents/scraper.py
+from playwright.async_api import async_playwright # Cambiado a async
+from playwright_stealth import stealth_async      # Versión async de stealth
 from app.core.config import settings
 
 class ScrapeAgent:
-    def get_public_data(self, url: str):
-        if not url: return None
+    async def get_public_data(self, url: str) -> str | None: # Ahora es async
+        """
+        Extrae texto de una URL pública usando Playwright Async con modo stealth.
+        """
+        if not url:
+            return None
         
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            # Configuración de proxy opcional para escalabilidad
+        async with async_playwright() as p:
+            # Lanzamos el navegador
+            browser = await p.chromium.launch(headless=True)
+            
             context_args = {}
             if settings.PROXY_URL:
                 context_args["proxy"] = {"server": settings.PROXY_URL}
                 
-            context = browser.new_context(**context_args)
-            page = context.new_page()
-            Stealth().apply_stealth_sync(page)
+            context = await browser.new_context(**context_args)
+            page = await context.new_page()
+            
+            # APLICAMOS STEALTH ASYNC
+            await stealth_async(page)
             
             try:
-                page.goto(url, wait_until="networkidle", timeout=30000)
-                # Extraemos el contenido principal visible
-                return page.locator("main").inner_text()
+                # Navegación asíncrona
+                await page.goto(url, wait_until="networkidle", timeout=30000)
+                
+                # Buscamos contenido en 'main', si no existe, traemos el 'body'
+                if await page.locator("main").count() > 0:
+                    return await page.locator("main").inner_text()
+                
+                return await page.inner_text("body")
+            
             except Exception as e:
-                print(f"Error en ScrapeAgent: {e}")
+                print(f"⚠️ Error en ScrapeAgent: {e}")
                 return None
             finally:
-                browser.close()
+                await browser.close()
